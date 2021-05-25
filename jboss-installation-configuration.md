@@ -127,16 +127,20 @@ ip addr show eth0
         <interface name="public">
             <inet-address value="${jboss.bind.address:172.30.1.43}" />
         </interface>
-    </interfaces>
+         <interface name="any">
+            <!-- Use the wildcard address -->
+            <any-address />
+        </interface>
+   </interfaces>
 ```
 
 ### Port Setting
 
-만약 JBOSS 인스턴스를 2개를 돌리려면 최소한 http, https, management-http, management-https 를 변경해야 한다.
+default-interface 를 any로 한다.
 
 ```
 -- standalone.xml
-    <socket-binding-group name="standard-sockets" default-interface="public" port-offset="${jboss.socket.binding.port-offset:0}">
+    <socket-binding-group name="standard-sockets" default-interface="any" port-offset="${jboss.socket.binding.port-offset:0}">
         <socket-binding name="ajp" port="${jboss.ajp.port:8009}" />
         <socket-binding name="http" port="${jboss.http.port:8080}" />
         <socket-binding name="https" port="${jboss.https.port:8443}" />
