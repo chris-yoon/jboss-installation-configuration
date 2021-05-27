@@ -13,6 +13,13 @@ java -jar jboss-eap-6.4.0-installer.jar ftp://network-host/auto.xml
 unzip jboss-eap-6.4.0.zip
 ```
 
+### Add user
+
+```
+-- Add a Management User (mgmt-users.properties)
+/bin/./add-user.sh
+```
+
 ### multi instances
 
 ```
