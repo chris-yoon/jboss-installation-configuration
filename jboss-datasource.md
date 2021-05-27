@@ -46,4 +46,9 @@ data-source add --name=PostgresPool --jndi-name=java:/PostgresDS --driver-name=p
 
 We can test it by going into the management console for Jboss
 
-> Configuration > Subsystems > Datasources > click [View] button
+> Configuration > Subsystems > Datasources > OracleDS click [Test Connection] button
+> or, run this line in jboss-cli:
+
+```
+/subsystem=datasources/data-source=OracleDS:test-connection-in-pool
+```
