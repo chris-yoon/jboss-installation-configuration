@@ -2,10 +2,20 @@
 
 ## 1. Connect CLI
 
+In JBoss EAP 6.4 we use port 9990 for HTTP management (web-based management console) and port 9999 for native management (management CLI)
+
+```
+./jboss-cli.sh --connect controller=127.0.0.1:9999
+
+[standalone@172.0.0.1:9999 /]
+```
+
+JBoss EAP 7.x uses port 9990 for both native management, used by the management CLI, and HTTP management, used by the web-based management console
+
 ```
 ./jboss-cli.sh --connect controller=127.0.0.1:9990
 
-[standalone@172.0.0.1:9000 /]
+[standalone@172.0.0.1:9990 /]
 ```
 
 ## 2. Install jdbc.jar
@@ -13,7 +23,7 @@
 ```
 module add --name=MODULE_NAME --resources=PATH_TO_RESOURCE --dependencies=DEPENDENCIES
 
--- Oracle
+-- Oracle (ojdbc6.jar for use with JDK6, ojdbc7.jar certified with JDK7+)
 module add --name=com.oracle --resources=/opt/ojdbc6.jar --dependencies=javax.api,javax.transaction.api
 
 -- Postgresql
