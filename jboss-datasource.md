@@ -23,8 +23,9 @@ JBoss EAP 7.x uses port 9990 for both native management, used by the management 
 ```
 module add --name=MODULE_NAME --resources=PATH_TO_RESOURCE --dependencies=DEPENDENCIES
 
--- Oracle (ojdbc6.jar for use with JDK6, ojdbc7.jar certified with JDK7+)
+-- Oracle (The 11g driver ojdbc6.jar certified for JDK6+, the 12c driver ojdbc7.jar certified with JDK7+)
 module add --name=com.oracle --resources=/opt/ojdbc6.jar --dependencies=javax.api,javax.transaction.api
+module add --name=com.oracle --resources=/opt/ojdbc7.jar --dependencies=javax.api,javax.transaction.api
 
 -- Postgresql
 module add --name=org.postgres --resources=~/Downloads/postgresql-9.4-1201.jdbc4.jar --dependencies=javax.api,javax.transaction.api
