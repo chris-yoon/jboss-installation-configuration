@@ -15,15 +15,17 @@ unzip jboss-eap-6.4.0.zip
 
 ### Add user
 
-```
--- Add a Management User (mgmt-users.properties)
-/bin/./add-user.sh
-```
-
-### multi instances
+Add a Management User (mgmt-users.properties)
 
 ```
--- Copy the standalone folder and its contents
+./add-user.sh
+```
+
+### Multi instances
+
+Copy the standalone folder and its contents
+
+```
 cp -r jboss-instance-1 jboss-instance-2
 ```
 
@@ -40,21 +42,20 @@ rm -f jboss-eap-6.4
 java -jar uninstaller.jar
 ```
 
-## JBOSS 실행
+## Starting JBOSS
 
-이 문서에서는 JBOSS 서버 아이피가 172.30.1.43 라고 가정한다.
-Standalone mode로 Server를 실행하려면 $HOME/bin/standalone.sh를 실행한다.
+Standalone mode로 Server를 실행하려면 $JBOSS_HOME/bin/standalone.sh를 실행한다.
 
 ```
--- standalone 외부에서 접속 가능한 IP 바인딩 (http://172.30.1.43:9990)
-/bin/./standalone.sh -b=172.30.1.43 -bmanagement=172.30.1.43
+-- standalone 외부에서 접속 가능한 IP 바인딩 (http://127.0.0.1:9990)
+./standalone.sh -b=127.0.0.1 -bmanagement=127.0.0.1
 
 -- standalone 여러개의 인스턴스 실행할 때
--- jboss-instance-2/bin 에서 다음 포트 충돌을 피하기 위해 port-offset=100 옵션으로 실행 (http://172.30.1.43:10090)
-/bin/./standalone.sh -b=172.30.1.43 -bmanagement=172.30.1.43 -Djboss.socket.binding.port-offset=100
+-- jboss-instance-2/bin 에서 다음 포트 충돌을 피하기 위해 port-offset=100 옵션으로 실행 (-> http://127.0.0.1:10090)
+./standalone.sh -b=127.0.0.1 -bmanagement=127.0.0.1 -Djboss.socket.binding.port-offset=100
 
 -- standalone-full-ha 로 프로파일 변경
-/bin/./standalone.sh -c standalone-full-ha.xml -b=172.30.1.43 -bmanagement=172.30.1.43 -Djboss.socket.binding.port-offset=100
+./standalone.sh -c standalone-full-ha.xml -b=127.0.0.1 -bmanagement=127.0.0.1 -Djboss.socket.binding.port-offset=100
 ```
 
 ### Difference between standalone mode and domain mode
@@ -71,21 +72,17 @@ Standalone mode로 Server를 실행하려면 $HOME/bin/standalone.sh를 실행�
 - standalone-ha.xml: Default profile with clustering capabilities
 - standalone-full-ha.xml: Full profile with clustering capabilities
 
-### Clustering Guide
+## Stopping JBOSS
 
-> https://docs.jboss.org/jbossas/docs/Clustering_Guide/4/html-single/
-
-### Start JBoss as a service
-
-```
-/bin/sudo service standalone.sh
+In JBoss EAP 6.4 we use port 9990 for HTTP management (web-based management console) and port 9999 for native management (management CLI)
+JBoss EAP 7 uses port 9990 for both native management, used by the management CLI, and HTTP management, used by the web-based management console
 
 ```
+-- Port 9999 should be used in JBOSS EAP 6.4
+./jboss-cli.sh --connect --controller=127.0.0.1:9999 command=:shutdown
 
-## Shutdown
-
-```
-/bin/./jboss-cli.sh --connect --controller=172.30.1.43:9990 command=:shutdown
+-- Port 9990 should be used in JBOSS EAP 7.x
+./jboss-cli.sh --connect --controller=127.0.0.1:9990 command=:shutdown
 
 ```
 
@@ -93,12 +90,17 @@ Standalone mode로 Server를 실행하려면 $HOME/bin/standalone.sh를 실행�
 
 ```
 -- start.sh
-/bin/./standalone.sh -b=172.30.1.43 -bmanagement=172.30.1.43
+./standalone.sh -b=127.0.0.1 -bmanagement=127.0.0.1
+-- start.sh (with port and port offset)
+./standalone.sh -b=127.0.0.1 -bmanagement=127.0.0.1 -Djboss.http.port=8080 -Djboss.socket.binding.port-offset=100
 
--- kill.sh
-/bin/./jboss-cli.sh --connect --controller=172.30.1.43:9990 command=:shutdown
+-- kill.sh (JBOSS EAP 6.4)
+./jboss-cli.sh --connect --controller=127.0.0.1:9999 command=:shutdown
+-- kill.sh (JBOSS EAP 7.x)
+./jboss-cli.sh --connect --controller=127.0.0.1:9990 command=:shutdown
 
 -- tail.sh
+tail -f $JBOSS_PATH/standalone/log/server.log
 
 -- chmod
 chmod +x *.sh
@@ -129,10 +131,10 @@ ip addr show eth0
 
     <interfaces>
         <interface name="management">
-            <inet-address value="${jboss.bind.address.management:172.30.1.43}" />
+            <inet-address value="${jboss.bind.address.management:127.0.0.1}" />
         </interface>
         <interface name="public">
-            <inet-address value="${jboss.bind.address:172.30.1.43}" />
+            <inet-address value="${jboss.bind.address:127.0.0.1}" />
         </interface>
          <interface name="any">
             <!-- Use the wildcard address -->
@@ -165,7 +167,7 @@ default-interface 를 any로 한다.
 
 웹애플리케이션을 JBoss 서버에 배포하는 방법은 2가지가 있다.
 
-> 1. http://172.30.1.43:9990/ 관리자페이지에 접속하여 Deployments 탭에서 war 파일을 업로드한다.
+> 1. http://127.0.0.1:9990/ 관리자페이지에 접속하여 Deployments 탭에서 war 파일을 업로드한다.
 > 2. war 파일을 직접 /standalone/deployments 폴더에 업로드한다. The standalone/deployments directory in the JBoss Application Server distribution is the location end users can place their deployment content (e.g. war, ear, jar, sar files) to have it automatically deployed into the server runtime.
 
 ### 전자정부 표준프레임워크 pom.xml
@@ -209,7 +211,7 @@ default-interface 를 any로 한다.
 </jboss-web>
 ```
 
-위와 같이 설정된 애플리케이션은 http://172.30.1.43:8080/ 으로 접근할 수 있다.
+위와 같이 설정된 애플리케이션은 http://127.0.0.1:8080/ 으로 접근할 수 있다.
 
 ```
 <!-- jboss-web.xml -->
@@ -219,4 +221,4 @@ default-interface 를 any로 한다.
 </jboss-web>
 ```
 
-위와 같이 설정된 애플리케이션은 http://172.30.1.43:8080/demo 로 접근할 수 있다.
+위와 같이 설정된 애플리케이션은 http://127.0.0.1:8080/demo 로 접근할 수 있다.

@@ -4,14 +4,11 @@
 # CONFIGURATION #
 #################
 JBOSS_PATH=/Users/chrisyoon/EAP-7.3.0	  # The path to the JBoss instance
-IP_ADDR=172.30.1.43
+IP_ADDR=127.0.0.1
 HTTP_PORT=8080
 PORT_OFFSET=0
 #########################################################
 
-# calculate new management port
-MGMT_PORT=`expr 9990 + $PORT_OFFSET`
-	
 # Starts the JBoss instance.
 # Redirects console log to /dev/null to avoid spamming the shell.
 start(){
