@@ -104,7 +104,72 @@ tail -f $JBOSS_PATH/standalone/log/server.log
 
 -- chmod
 chmod +x *.sh
+```
 
+### start.sh
+
+```
+#!/bin/sh
+
+JBOSS_PATH=/Users/chrisyoon/EAP-7.3.0	  # The path to the JBoss instance
+IP_ADDR=127.0.0.1
+HTTP_PORT=80
+PORT_OFFSET=0
+
+# Starts the JBoss instance.
+# Redirects console log to /dev/null to avoid spamming the shell.
+start(){
+  echo "Starting jboss..."
+  $JBOSS_PATH/bin/standalone.sh -Djboss.bind.address=$IP_ADDR -Djboss.bind.address.management=$IP_ADDR -Djboss.http.port=$HTTP_PORT -Djboss.socket.binding.port-offset=$PORT_OFFSET> /dev/null 2>&1 &
+}
+
+start
+
+exit 0
+```
+
+### kill.sh
+
+```
+#!/bin/sh
+
+JBOSS_PATH=/Users/chrisyoon/EAP-7.3.0	  # The path to the JBoss instance
+IP_ADDR=127.0.0.1
+PORT_OFFSET=10
+
+# calculate new management port
+MGMT_PORT=`expr 9990 + $PORT_OFFSET`
+
+# Gracefully stops JBoss instance via management CLI interface.
+stop(){
+  echo "Stopping jboss..."
+  sh $JBOSS_PATH/bin/jboss-cli.sh --connect controller=$IP_ADDR:$MGMT_PORT command=:shutdown
+  if [ $? -ne 0 ]
+    then echo "Failed to gracefully stop JBoss."
+  fi
+}
+
+stop
+
+exit 0
+```
+
+### tail.sh
+
+```
+#!/bin/sh
+
+JBOSS_PATH=/Users/chrisyoon/EAP-7.3.0	  # The path to the JBoss instance
+
+# Tails JBoss log to console.
+log(){
+  echo "Tailing jboss log..."
+  tail -f $JBOSS_PATH/standalone/log/server.log
+}
+
+log
+
+exit 0
 ```
 
 ## JBOSS 설정
@@ -165,10 +230,19 @@ default-interface 를 any로 한다.
 
 ## Deployment
 
-웹애플리케이션을 JBoss 서버에 배포하는 방법은 2가지가 있다.
+웹애플리케이션을 JBoss 서버에 배포하는 방법은 4가지가 있다.
 
 > 1. http://127.0.0.1:9990/ 관리자페이지에 접속하여 Deployments 탭에서 war 파일을 업로드한다.
 > 2. war 파일을 직접 /standalone/deployments 폴더에 업로드한다. The standalone/deployments directory in the JBoss Application Server distribution is the location end users can place their deployment content (e.g. war, ear, jar, sar files) to have it automatically deployed into the server runtime.
+> 3. jboss-cli (recommended)
+
+### Deploy via jboss-cli
+
+Deploying applications via the Management CLI gives you the benefit of single command line interface with the ability to create and run deployment scripts.
+
+```
+jboss-cli.sh -c --force --controller=127.0.0.1:9990 --command="deploy /path/to/test-application.war"
+```
 
 ### 전자정부 표준프레임워크 pom.xml
 
